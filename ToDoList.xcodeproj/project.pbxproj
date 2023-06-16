@@ -16,6 +16,8 @@
 		852B8A422A38E0B300360537 /* ToDoListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A412A38E0B300360537 /* ToDoListTests.swift */; };
 		852B8A4C2A38E0B300360537 /* ToDoListUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A4B2A38E0B300360537 /* ToDoListUITests.swift */; };
 		852B8A4E2A38E0B300360537 /* ToDoListUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A4D2A38E0B300360537 /* ToDoListUITestsLaunchTests.swift */; };
+		852B8A5B2A38E11300360537 /* ToDoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A5A2A38E11300360537 /* ToDoItem.swift */; };
+		852B8A5D2A38F11400360537 /* FileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A5C2A38F11400360537 /* FileCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +51,8 @@
 		852B8A472A38E0B300360537 /* ToDoListUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ToDoListUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		852B8A4B2A38E0B300360537 /* ToDoListUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListUITests.swift; sourceTree = "<group>"; };
 		852B8A4D2A38E0B300360537 /* ToDoListUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoListUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		852B8A5A2A38E11300360537 /* ToDoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoItem.swift; sourceTree = "<group>"; };
+		852B8A5C2A38F11400360537 /* FileCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +110,8 @@
 				852B8A332A38E0B300360537 /* Assets.xcassets */,
 				852B8A352A38E0B300360537 /* LaunchScreen.storyboard */,
 				852B8A382A38E0B300360537 /* Info.plist */,
+				852B8A5A2A38E11300360537 /* ToDoItem.swift */,
+				852B8A5C2A38F11400360537 /* FileCache.swift */,
 			);
 			path = ToDoList;
 			sourceTree = "<group>";
@@ -260,6 +266,8 @@
 			files = (
 				852B8A2F2A38E0B100360537 /* ViewController.swift in Sources */,
 				852B8A2B2A38E0B100360537 /* AppDelegate.swift in Sources */,
+				852B8A5B2A38E11300360537 /* ToDoItem.swift in Sources */,
+				852B8A5D2A38F11400360537 /* FileCache.swift in Sources */,
 				852B8A2D2A38E0B100360537 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

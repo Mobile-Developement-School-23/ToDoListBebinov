@@ -7,24 +7,39 @@
 
 import Foundation
 
-struct ToDoItem: Codable {
-    enum Importance: String, Codable {
-        case low
-        case basic
-        case important
-    }
-    
-    var id: String = UUID().uuidString
-    let text: String
-    let deadline: Date?
-    let creationDate: Date
-    
-    var isDone: Bool
-    var modifiedDate: Date?
-    var importance: Importance
+enum Importance: String {
+    case low
+    case basic
+    case important
 }
-
-extension ToDoItem {
+struct ToDoItem {
+    let id: String
+    let text: String
+    let importance: Importance
+    let deadline: Date?
+    let isDone: Bool
+    let creationDate: Date
+    let modifiedDate: Date?
+    
+    init(
+        id: String = UUID().uuidString,
+        text: String,
+        importance: Importance,
+        deadline: Date? = nil,
+        isDone: Bool = false,
+        creationDate: Date = Date(),
+        modifiedDate: Date? = nil
+    ) {
+        self.id = id
+        self.text = text
+        self.importance = importance
+        self.deadline = deadline
+        self.isDone = isDone
+        self.creationDate = creationDate
+        self.modifiedDate = modifiedDate
+    }
+}
+ extension ToDoItem {
     var json: Any {
         var items: [String:Any] = [:]
         items["id"] = id
@@ -33,44 +48,37 @@ extension ToDoItem {
             items["importance"] = importance.rawValue
         }
         if let deadline{
-            let deadlineFl = CGFloat(deadline.timeIntervalSince1970)
+            let deadlineFl = Int(deadline.timeIntervalSince1970)
             items["deadline"] = deadlineFl
         }
         items["done"] = isDone
-        let creationFl = CGFloat(creationDate.timeIntervalSince1970)
+        let creationFl = Int(creationDate.timeIntervalSince1970)
         items["created_at"] = creationFl
         if let modifiedDate{
-            let modifiedFl = CGFloat(modifiedDate.timeIntervalSince1970)
+            let modifiedFl = Int(modifiedDate.timeIntervalSince1970)
             items["changed_at"] = modifiedFl
         }
         return items
     }
-
-    static func parse (json: Any) -> ToDoItem? {
-    
-            guard let data = try? JSONSerialization.data(withJSONObject: json, options: []) else {
-                return nil
-            }
-            
-            guard let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []) else {
-                return nil
-            }
-            
-            if let jsonDict = jsonObject as? [String: Any],
-               let id = jsonDict["id"] as? String,
-               let text = jsonDict["text"] as? String,
-               let importance = jsonDict["importance"] as? Importance,
-               let deadlineFl = jsonDict["deadline"] as? CGFloat,
-               let isDone = jsonDict["done"] as? Bool,
-               let creationDateFl = jsonDict["created_at"] as? CGFloat,
-               let modifiedDateFl = jsonDict["changed_at"] as? CGFloat {
-                let creationDate = Date(timeIntervalSince1970: creationDateFl)
-                let modifiedDate = Date(timeIntervalSince1970: modifiedDateFl)
-                let deadline = Date(timeIntervalSince1970: deadlineFl)
-                let todoItem = ToDoItem(id:id, text: text, deadline: deadline, creationDate: creationDate, isDone: isDone, modifiedDate: modifiedDate, importance: importance)
-                return todoItem
-            } else {
-                return nil
-            }
-    }
-}
+     
+     static func parse (json: Any) -> ToDoItem? {
+         guard let js = json as? [String: Any] else {
+             return nil
+         }
+         
+         guard
+            let id = js["id"] as? String,
+            let text = js["text"] as? String,
+            let createdAt = (js["created_at"] as? Int).flatMap ({ Date(timeIntervalSince1970: TimeInterval($0)) })
+         else {
+             return nil
+         }
+         
+         let importance = (js["importance"] as? String).flatMap(Importance.init(rawValue:)) ?? .basic
+         let deadline = (js["deadline"] as? Int).flatMap { Date(timeIntervalSince1970: TimeInterval($0)) }
+         let isDone = (js["done"] as? Bool) ?? false
+         let changedAt = (js["changed_at"] as? Int).flatMap { Date(timeIntervalSince1970: TimeInterval($0)) }
+         
+         return ToDoItem(id: id, text: text, importance: importance, deadline: deadline, isDone: isDone, creationDate: createdAt, modifiedDate: changedAt)
+     }
+ }

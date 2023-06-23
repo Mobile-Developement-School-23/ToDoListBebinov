@@ -7,61 +7,55 @@
 
 import Foundation
 
+enum FileCacheErrors: Error {
+    case cannotFindSystemDirectory
+    case unparsableData
+}
+
 class FileCache{
-    private (set) var items = [ToDoItem]()
-    private let fileName = "json"
+    private(set) var items: [String: ToDoItem] = [:]
     
-    func addTask(newItem: ToDoItem) {
-        for (index, item) in items.enumerated() {
-            if item.id == newItem.id {
-                items[index] = newItem
-                return
-            }
+    @discardableResult
+    func add(_ item: ToDoItem) -> ToDoItem? {
+        let oldItem = items[item.id]
+        items[item.id] = item
+        return oldItem
+    }
+    
+    @discardableResult
+    func remove(_ id: String) -> ToDoItem? {
+        let item = items[id]
+        items[id] = nil
+        return item
+    }
+    
+    func save(to file: String) throws {
+        let fm = FileManager.default
+        guard let dir = fm.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            throw FileCacheErrors.cannotFindSystemDirectory
         }
         
-        items.append(newItem)
-        return
+        let path = dir.appendingPathComponent("\(file).json")
+        let serializedItems = items.map { _, item in item.json }
+        let data = try JSONSerialization.data(withJSONObject: serializedItems, options: [])
+        try data.write(to: path)
     }
     
-    func deleteTask(id: String){
-        for i in 0..<items.count{
-            if items[i].id == id {
-                items.remove(at: i)
-                return
-            }
+    func load(from file: String) throws {
+        let fm = FileManager.default
+        guard let dir = fm.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            throw FileCacheErrors.cannotFindSystemDirectory
         }
-        print("task not found") // TODO: throw error
-    }
-    
-    private func saveItems() {
-        do {
-            let data = try JSONEncoder().encode(items)
-            let fileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent(fileName)
-            try data.write(to: fileURL)
-        } catch {
-            print("Failed to save names: \(error)")
+        
+        let path = dir.appendingPathComponent("\(file).json")
+        let data = try Data(contentsOf: path)
+        let json = try JSONSerialization.jsonObject(with: data, options: [])
+        guard let js = json as? [Any] else {
+            throw FileCacheErrors.unparsableData
         }
-    }
-    
-    private func loadItems() {
-        let fileManager = FileManager.default
-        do {
-            let fileURL = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-                .appendingPathComponent(fileName)
-            
-            if fileManager.fileExists(atPath: fileURL.path) {
-                print("файл по имени json сушествует")
-                let data = try Data(contentsOf: fileURL)
-                items = try JSONDecoder().decode([ToDoItem].self, from: data)
-                
-                print("loadNames: \(items)")
-            } else {
-                print("зашли при первом запуске")
-                items = []
-                saveItems() // Create a new JSON file with an empty array
-            }
-        } catch {
-            print("Failed to load names: \(error)")
+        let deserializedItems = js.compactMap { ToDoItem.parse(json: $0) }
+        self.items = deserializedItems.reduce(into: [:]) { res, item in
+            res[item.id] = item
         }
     }
 }

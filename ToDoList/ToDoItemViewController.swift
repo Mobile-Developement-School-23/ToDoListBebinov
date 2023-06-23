@@ -10,10 +10,12 @@ import UIKit
 class ToDoItemViewController: UIViewController{
     private lazy var textView:UITextView = {
         let textView = UITextView()
+        textView.backgroundColor = UIColor(named: "ElementsColor")
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.layer.cornerRadius = 16
         textView.delegate = self
-        textView.font = .systemFont(ofSize: 24)
+        textView.font = .systemFont(ofSize: 17)
+        textView.textContainer.lineFragmentPadding = 16
         textView.isScrollEnabled = false
         return textView
     }()
@@ -22,7 +24,7 @@ class ToDoItemViewController: UIViewController{
         let setParamsView = UIView()
         setParamsView.translatesAutoresizingMaskIntoConstraints = false
         setParamsView.layer.cornerRadius = 16
-        setParamsView.backgroundColor = .white
+        setParamsView.backgroundColor = UIColor(named: "ElementsColor")
         return setParamsView
     }()
     
@@ -57,6 +59,15 @@ class ToDoItemViewController: UIViewController{
         return deadlineLabel
     }()
     
+    private lazy var whatToDoLabel: UILabel = {
+        let whatToDoLabel = UILabel()
+        whatToDoLabel.translatesAutoresizingMaskIntoConstraints = false
+        whatToDoLabel.text = "Что надо сделать?"
+        whatToDoLabel.textColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.3)
+        whatToDoLabel.font = .systemFont(ofSize: 17)
+        return whatToDoLabel
+    }()
+    
     private lazy var imporatanceSegmentedControl: UISegmentedControl = {
         let imporatanceSegmentedControl = UISegmentedControl(items: [UIImage(named: "lowPriority")!, "нет", "‼️"])
         imporatanceSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
@@ -73,6 +84,7 @@ class ToDoItemViewController: UIViewController{
     
     private lazy var calendarView: UICalendarView = {
         let calendarView = UICalendarView()
+        calendarView.backgroundColor = UIColor(named: "ElementsColor")
         calendarView.translatesAutoresizingMaskIntoConstraints = false
         calendarView.availableDateRange = DateInterval(start: .now, end: .distantFuture)
         calendarView.calendar = .current
@@ -110,7 +122,7 @@ class ToDoItemViewController: UIViewController{
         let deleteButton = UIButton()
         deleteButton.translatesAutoresizingMaskIntoConstraints = false
         deleteButton.isEnabled = false
-        deleteButton.backgroundColor = .white
+        deleteButton.backgroundColor = UIColor(named: "ElementsColor")
         deleteButton.layer.cornerRadius = 16
         deleteButton.setTitle("Удалить", for: .normal)
         deleteButton.setTitleColor(.red, for: .normal)
@@ -139,6 +151,8 @@ class ToDoItemViewController: UIViewController{
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Сохранить", style: .done, target: self, action: #selector(save))
         navigationItem.rightBarButtonItem?.isEnabled = false
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Отменить", style: .plain, target: self, action: #selector(cancel))
+        
+        subscribeToKeyboard()
         
         view.addSubview(scrollView)
         NSLayoutConstraint.activate([scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor), scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor), scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor), scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)])
@@ -212,8 +226,31 @@ class ToDoItemViewController: UIViewController{
             deleteButton.topAnchor.constraint(equalTo: setParamsView.bottomAnchor, constant: 16), deleteButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16), deleteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16), deleteButton.heightAnchor.constraint(equalToConstant: 56),
             deleteButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
-
+        
+        textView.addSubview(whatToDoLabel)
+        NSLayoutConstraint.activate([
+            whatToDoLabel.topAnchor.constraint(equalTo: textView.topAnchor, constant: 17), whatToDoLabel.leadingAnchor.constraint(equalTo: textView.leadingAnchor, constant: 16)])
+        
         loadFromCache()
+    }
+    
+    private func subscribeToKeyboard(){
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboard), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc func handleKeyboard(_ notification: NSNotification){
+        guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
+            return
+        }
+        let height = view.convert(keyboardValue.cgRectValue, from: view.window).height
+        let keyboardConst: CGFloat
+        if notification.name == UIResponder.keyboardWillShowNotification {
+            keyboardConst = height + 16
+        } else {
+            keyboardConst = 32
+        }
+        scrollView.contentInset.bottom = -keyboardConst
     }
     
     @objc func save(){
@@ -303,6 +340,10 @@ class ToDoItemViewController: UIViewController{
 extension ToDoItemViewController: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         navigationItem.rightBarButtonItem?.isEnabled = textView.text.isEmpty == false
+    }
+    
+    func textViewDidBeginEditing(_ textView: UITextView){
+        whatToDoLabel.isHidden = textView.isFirstResponder
     }
 }
 

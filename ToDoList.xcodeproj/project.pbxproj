@@ -15,6 +15,7 @@
 		852B8A372A38E0B300360537 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 852B8A352A38E0B300360537 /* LaunchScreen.storyboard */; };
 		852B8A5B2A38E11300360537 /* ToDoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A5A2A38E11300360537 /* ToDoItem.swift */; };
 		852B8A5D2A38F11400360537 /* FileCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A5C2A38F11400360537 /* FileCache.swift */; };
+		852B8A872A41F51100360537 /* ToDoItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A862A41F51100360537 /* ToDoItemViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		852B8A472A38E0B300360537 /* ToDoListUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ToDoListUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		852B8A5A2A38E11300360537 /* ToDoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoItem.swift; sourceTree = "<group>"; };
 		852B8A5C2A38F11400360537 /* FileCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileCache.swift; sourceTree = "<group>"; };
+		852B8A862A41F51100360537 /* ToDoItemViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoItemViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 				852B8A2A2A38E0B100360537 /* AppDelegate.swift */,
 				852B8A2C2A38E0B100360537 /* SceneDelegate.swift */,
 				852B8A2E2A38E0B100360537 /* ViewController.swift */,
+				852B8A862A41F51100360537 /* ToDoItemViewController.swift */,
 				852B8A302A38E0B100360537 /* Main.storyboard */,
 				852B8A332A38E0B300360537 /* Assets.xcassets */,
 				852B8A352A38E0B300360537 /* LaunchScreen.storyboard */,
@@ -240,6 +243,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				852B8A2F2A38E0B100360537 /* ViewController.swift in Sources */,
+				852B8A872A41F51100360537 /* ToDoItemViewController.swift in Sources */,
 				852B8A2B2A38E0B100360537 /* AppDelegate.swift in Sources */,
 				852B8A5B2A38E11300360537 /* ToDoItem.swift in Sources */,
 				852B8A5D2A38F11400360537 /* FileCache.swift in Sources */,

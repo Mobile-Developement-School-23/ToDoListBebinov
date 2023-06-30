@@ -8,6 +8,17 @@
 import UIKit
 
 class ToDoItemViewController: UIViewController{
+    
+    var todoItem: ToDoItem?
+    
+    private var fileCache:FileCache = {
+        let fileCache = FileCache()
+        try? fileCache.load(from: "todoItemsCache")
+        return fileCache
+    }()
+    
+    var updateHandler: (() -> Void)?
+    
     private lazy var textView:UITextView = {
         let textView = UITextView()
         textView.backgroundColor = UIColor(named: "ElementsColor")
@@ -17,6 +28,7 @@ class ToDoItemViewController: UIViewController{
         textView.font = .systemFont(ofSize: 17)
         textView.textContainer.lineFragmentPadding = 16
         textView.isScrollEnabled = false
+        textView.textContainerInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
         return textView
     }()
     
@@ -85,6 +97,7 @@ class ToDoItemViewController: UIViewController{
     private lazy var calendarView: UICalendarView = {
         let calendarView = UICalendarView()
         calendarView.backgroundColor = UIColor(named: "ElementsColor")
+        calendarView.layer.cornerRadius = 16
         calendarView.translatesAutoresizingMaskIntoConstraints = false
         calendarView.availableDateRange = DateInterval(start: .now, end: .distantFuture)
         calendarView.calendar = .current
@@ -105,6 +118,8 @@ class ToDoItemViewController: UIViewController{
     private lazy var calendarViewZeroHeightConstraint: NSLayoutConstraint = calendarView.heightAnchor.constraint(equalToConstant: 0)
     
     private lazy var dateButtonHeightConstraint: NSLayoutConstraint = dateButton.heightAnchor.constraint(equalToConstant: 0)
+    
+    private lazy var scrollViewBottomConstaint: NSLayoutConstraint = scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -141,12 +156,14 @@ class ToDoItemViewController: UIViewController{
         }
     }
     
+    private lazy var tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "BackgroundColor")
         title = "Дело"
-        view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap)))
-        //view.backgroundColor = UIColor(red: 247 / 255, green: 246 / 255, blue: 242 / 255, alpha: 1)
+        tapGestureRecognizer.isEnabled = false
+        view.addGestureRecognizer(tapGestureRecognizer)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Сохранить", style: .done, target: self, action: #selector(save))
         navigationItem.rightBarButtonItem?.isEnabled = false
@@ -155,11 +172,15 @@ class ToDoItemViewController: UIViewController{
         subscribeToKeyboard()
         
         view.addSubview(scrollView)
-        NSLayoutConstraint.activate([scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor), scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor), scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor), scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)])
+        NSLayoutConstraint.activate([scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor), scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor), scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor), scrollViewBottomConstaint ])
         
         scrollView.addSubview(contentView)
         NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor), contentView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor), contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, multiplier: 1), contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)])
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor)])
         
         contentView.addSubview(textView)
         NSLayoutConstraint.activate([
@@ -229,7 +250,7 @@ class ToDoItemViewController: UIViewController{
         
         textView.addSubview(whatToDoLabel)
         NSLayoutConstraint.activate([
-            whatToDoLabel.topAnchor.constraint(equalTo: textView.topAnchor, constant: 17), whatToDoLabel.leadingAnchor.constraint(equalTo: textView.leadingAnchor, constant: 16)])
+            whatToDoLabel.topAnchor.constraint(equalTo: textView.topAnchor, constant: 12), whatToDoLabel.leadingAnchor.constraint(equalTo: textView.leadingAnchor, constant: 16)])
         
         loadFromCache()
     }
@@ -238,7 +259,7 @@ class ToDoItemViewController: UIViewController{
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboard), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
-    
+
     @objc func handleKeyboard(_ notification: NSNotification){
         guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else {
             return
@@ -247,10 +268,15 @@ class ToDoItemViewController: UIViewController{
         let keyboardConst: CGFloat
         if notification.name == UIResponder.keyboardWillShowNotification {
             keyboardConst = height + 16
+            tapGestureRecognizer.isEnabled = true
         } else {
-            keyboardConst = 32
+            keyboardConst = 0
+            tapGestureRecognizer.isEnabled = false
         }
-        scrollView.contentInset.bottom = -keyboardConst
+        scrollView.contentInset.bottom = keyboardConst
+        UIView.animate(withDuration: 0.5) {
+            self.view.layoutSubviews()
+        }
     }
     
     @objc func save(){
@@ -264,21 +290,21 @@ class ToDoItemViewController: UIViewController{
         default:
             importance = .important
         }
-        let todoItem = ToDoItem(text: textView.text, importance: importance, deadline: deadlineDate)
-        let fileCache: FileCache = FileCache()
+        var id: String? = nil
+        if  let item = todoItem {
+            id = item.id
+        }
+        let todoItem = ToDoItem(id: id ?? UUID().uuidString, text: textView.text, importance: importance, deadline: deadlineDate)
         fileCache.add(todoItem)
         try? fileCache.save(to: "todoItemsCache")
+        updateHandler?()
+        dismiss(animated: true)
     }
     
     func loadFromCache(){
-        let fileCache: FileCache = FileCache()
-        do {
-            try fileCache.load(from: "todoItemsCache")
-        } catch {
-            print(error)
-        }
-        if  let (_, item) = fileCache.items.first{
+        if  let item = todoItem {
             textView.text = item.text
+            whatToDoLabel.isHidden = true
             switch item.importance{
             case .important:
                 imporatanceSegmentedControl.selectedSegmentIndex = 2
@@ -296,15 +322,16 @@ class ToDoItemViewController: UIViewController{
     }
     
     @objc func deleteFromCache(){
-        let fileCache: FileCache = FileCache()
         if  let (key, _) = fileCache.items.first{
             fileCache.remove(key)
         }
         try? fileCache.save(to: "todoItemsCache")
+        updateHandler?()
+        dismiss(animated: true)
     }
     
     @objc func cancel(){
-        print("cancel")
+        dismiss(animated: true)
     }
 
     @objc func showCalendar() {
@@ -344,6 +371,12 @@ extension ToDoItemViewController: UITextViewDelegate {
     
     func textViewDidBeginEditing(_ textView: UITextView){
         whatToDoLabel.isHidden = textView.isFirstResponder
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView){
+        if !textView.isFirstResponder && textView.text.isEmpty {
+            whatToDoLabel.isHidden = false
+        }
     }
 }
 

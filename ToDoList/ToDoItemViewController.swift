@@ -8,6 +8,17 @@
 import UIKit
 
 class ToDoItemViewController: UIViewController{
+    
+    var todoItem: ToDoItem?
+    
+    private var fileCache:FileCache = {
+        let fileCache = FileCache()
+        try? fileCache.load(from: "todoItemsCache")
+        return fileCache
+    }()
+    
+    var updateHandler: (() -> Void)?
+    
     private lazy var textView:UITextView = {
         let textView = UITextView()
         textView.backgroundColor = UIColor(named: "ElementsColor")
@@ -165,7 +176,11 @@ class ToDoItemViewController: UIViewController{
         
         scrollView.addSubview(contentView)
         NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor), contentView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor), contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, multiplier: 1), contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)])
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor)])
         
         contentView.addSubview(textView)
         NSLayoutConstraint.activate([
@@ -258,7 +273,7 @@ class ToDoItemViewController: UIViewController{
             keyboardConst = 0
             tapGestureRecognizer.isEnabled = false
         }
-        scrollViewBottomConstaint.constant = -keyboardConst
+        scrollView.contentInset.bottom = keyboardConst
         UIView.animate(withDuration: 0.5) {
             self.view.layoutSubviews()
         }
@@ -275,20 +290,19 @@ class ToDoItemViewController: UIViewController{
         default:
             importance = .important
         }
-        let todoItem = ToDoItem(text: textView.text, importance: importance, deadline: deadlineDate)
-        let fileCache: FileCache = FileCache()
+        var id: String? = nil
+        if  let item = todoItem {
+            id = item.id
+        }
+        let todoItem = ToDoItem(id: id ?? UUID().uuidString, text: textView.text, importance: importance, deadline: deadlineDate)
         fileCache.add(todoItem)
         try? fileCache.save(to: "todoItemsCache")
+        updateHandler?()
+        dismiss(animated: true)
     }
     
     func loadFromCache(){
-        let fileCache: FileCache = FileCache()
-        do {
-            try fileCache.load(from: "todoItemsCache")
-        } catch {
-            print(error)
-        }
-        if  let (_, item) = fileCache.items.first{
+        if  let item = todoItem {
             textView.text = item.text
             whatToDoLabel.isHidden = true
             switch item.importance{
@@ -308,15 +322,16 @@ class ToDoItemViewController: UIViewController{
     }
     
     @objc func deleteFromCache(){
-        let fileCache: FileCache = FileCache()
         if  let (key, _) = fileCache.items.first{
             fileCache.remove(key)
         }
         try? fileCache.save(to: "todoItemsCache")
+        updateHandler?()
+        dismiss(animated: true)
     }
     
     @objc func cancel(){
-        print("cancel")
+        dismiss(animated: true)
     }
 
     @objc func showCalendar() {

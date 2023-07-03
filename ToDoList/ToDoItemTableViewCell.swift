@@ -51,21 +51,34 @@ class ToDoItemTableViewCell: UITableViewCell {
     }
     
     func configure(with todoItem: ToDoItem){
+        var text = todoItem.text
+        if todoItem.isDone == false{
+            switch todoItem.importance{
+            case .basic:
+                break
+            case .low:
+                text = "↓ " + text
+            case .important:
+                text = "‼️ " + text
+            }
+        }
+        let attributesDone: [NSAttributedString.Key : Any] = [.strikethroughStyle : 2, .foregroundColor: UIColor.gray]
+        let attributesNotDone: [NSAttributedString.Key : Any] = [ .foregroundColor: UIColor.black]
+        let finalAttributes = todoItem.isDone ? attributesDone : attributesNotDone
+        let attributedText = NSAttributedString(string: text, attributes: finalAttributes)
+        titleLabel.attributedText = attributedText
         if todoItem.isDone{
-            let attributeString: NSMutableAttributedString = NSMutableAttributedString(string: todoItem.text)
-            attributeString.addAttribute(NSAttributedString.Key.strikethroughStyle, value: 2, range: NSRange(location: 0, length: attributeString.length))
-            attributeString.addAttribute(NSAttributedString.Key.foregroundColor, value: UIColor.gray, range: NSRange(location: 0, length: attributeString.length))
-            titleLabel.attributedText = attributeString
+            
             statusImageView.image = UIImage(named: "on")
         } else if todoItem.importance == .important {
-            titleLabel.text = "‼️ " + todoItem.text
+            
             statusImageView.image = UIImage(named: "highPriority")
         } else if todoItem.importance == .low{
-            titleLabel.text = "↓ " + todoItem.text
+            
             statusImageView.image = UIImage(named: "off")
         } else {
             statusImageView.image = UIImage(named: "off")
-            titleLabel.text = todoItem.text
+            
         }
     }
 }

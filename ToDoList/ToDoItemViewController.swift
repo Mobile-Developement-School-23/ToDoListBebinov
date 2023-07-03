@@ -291,10 +291,12 @@ class ToDoItemViewController: UIViewController{
             importance = .important
         }
         var id: String? = nil
+        var creationDate = Date()
         if  let item = todoItem {
             id = item.id
+            creationDate = item.creationDate
         }
-        let todoItem = ToDoItem(id: id ?? UUID().uuidString, text: textView.text, importance: importance, deadline: deadlineDate)
+        let todoItem = ToDoItem(id: id ?? UUID().uuidString, text: textView.text, importance: importance, deadline: deadlineDate, creationDate: creationDate)
         fileCache.add(todoItem)
         try? fileCache.save(to: "todoItemsCache")
         updateHandler?()

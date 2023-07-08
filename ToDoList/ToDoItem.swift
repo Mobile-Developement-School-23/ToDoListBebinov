@@ -7,12 +7,12 @@
 
 import Foundation
 
-enum Importance: String {
+enum Importance: String, Codable {
     case low
     case basic
     case important
 }
-struct ToDoItem {
+struct ToDoItem: Codable {
     let id: String
     let text: String
     let importance: Importance

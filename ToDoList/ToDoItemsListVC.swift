@@ -28,8 +28,6 @@ class ToDoItemsListVC: UIViewController{
         plusButton.translatesAutoresizingMaskIntoConstraints = false
         let image = UIImage(named: "plus")
         plusButton.setBackgroundImage(image, for: .normal)
-//        plusButton.imageView?.contentMode = .scaleAspectFill
-        //plusButton.configuration = .filled()
         plusButton.addTarget(self, action: #selector(createNewItem) , for: .touchUpInside)
         return plusButton
     }()
@@ -56,6 +54,11 @@ class ToDoItemsListVC: UIViewController{
         view.addSubview(plusButton)
         NSLayoutConstraint.activate([plusButton.widthAnchor.constraint(equalToConstant: 44), plusButton.heightAnchor.constraint(equalToConstant: 44), plusButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -54), plusButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)])
         updateToDoItems()
+        var service = DefaultNetworkingService()
+        Task{
+            let todoItemsList = try await service.todoItemsList()
+            print(todoItemsList)
+        }
     }
     
     @objc func createNewItem(){

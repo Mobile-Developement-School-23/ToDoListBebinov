@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CocoaLumberjackSwift
 
 class ToDoItemsListVC: UIViewController{
     
@@ -26,25 +27,17 @@ class ToDoItemsListVC: UIViewController{
         let plusButton = UIButton()
         plusButton.translatesAutoresizingMaskIntoConstraints = false
         let image = UIImage(named: "plus")
-        plusButton.setImage(image, for: .normal)
-//        plusButton.imageView?.contentMode = .scaleAspectFill
-        //plusButton.configuration = .filled()
+        plusButton.setBackgroundImage(image, for: .normal)
         plusButton.addTarget(self, action: #selector(createNewItem) , for: .touchUpInside)
         return plusButton
     }()
     private lazy var fileCache = FileCache()
     
-    private lazy var toDoItems: [ToDoItem] = {
-        try? fileCache.load(from: "todoItemsCache")
-        var items = [ToDoItem]()
-        for (key, item) in fileCache.items {
-            items.append(item)
-        }
-        return items
-    }()
+    private lazy var toDoItems: [ToDoItem] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        DDLog.add(DDOSLogger.sharedInstance)
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.layoutMargins.left = 32
         navigationController?.navigationBar.layoutMargins.top = 88
@@ -60,6 +53,13 @@ class ToDoItemsListVC: UIViewController{
         
         view.addSubview(plusButton)
         NSLayoutConstraint.activate([plusButton.widthAnchor.constraint(equalToConstant: 44), plusButton.heightAnchor.constraint(equalToConstant: 44), plusButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -54), plusButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)])
+        updateToDoItems()
+        var service = DefaultNetworkingService()
+        Task{
+            let todoItemsList = try await service.todoItemsList()
+            print(todoItemsList)
+        }
+        fileCache.loadFromCoreData()
     }
     
     @objc func createNewItem(){
@@ -72,7 +72,7 @@ class ToDoItemsListVC: UIViewController{
     }
     
     func updateToDoItems(){
-        try? fileCache.load(from: "todoItemsCache")
+        fileCache.loadFromCoreData()
         var items = [ToDoItem]()
         for (_, item) in fileCache.items {
             items.append(item)
@@ -82,7 +82,11 @@ class ToDoItemsListVC: UIViewController{
                 todoItem.isDone == false
             })
         }
+        items.sort { todoitem1, todoitem2 in
+            todoitem1.creationDate < todoitem2.creationDate
+        }
         toDoItems = items
+        DDLogDebug(toDoItems)
         tableView.reloadData()
     }
 }
@@ -93,17 +97,20 @@ extension ToDoItemsListVC: UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemTableViewCell", for: indexPath) as! ToDoItemTableViewCell
+        // swiftlint:disable:next force_cast
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemTableViewCell", for: indexPath) as! ToDoItemTableViewCell 
         let item = toDoItems[indexPath.row]
         cell.configure(with: item)
         return cell
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        // swiftlint:disable:next force_cast
         let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "ToDoItemsHeaderView") as! ToDoItemsHeaderView
-        let completedItems = toDoItems.filter { toDoItem in
-            toDoItem.isDone
+        let completedItems = fileCache.items.filter { (key, item) in
+            item.isDone
         }
+        
         headerView.showHandler = { [weak self] in
             self?.showCompleted.toggle()
             self?.updateToDoItems()
@@ -128,7 +135,7 @@ extension ToDoItemsListVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let delete = UIContextualAction(style: .destructive, title: nil, handler: {_,_,_ in
             self.fileCache.remove(self.toDoItems[indexPath.row].id)
-            try? self.fileCache.save(to: "todoItemsCache")
+            self.fileCache.saveToCoreData()
             self.updateToDoItems()
         })
         let info = UIContextualAction(style: .normal, title: "info", handler: {_,_,_ in
@@ -140,12 +147,11 @@ extension ToDoItemsListVC: UITableViewDelegate {
     }
     func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let done = UIContextualAction(style: .normal, title: nil, handler: {_,_,_ in
-//            let itemToChange = self.toDoItems[indexPath.row]
-//            let completedItem =  ToDoItem(id: itemToChange.id,text: itemToChange.text, importance: itemToChange.importance, deadline: itemToChange.deadline, isDone: true)
-            // TODO: fix
-//            self.fileCache.add(completedItem)
-//            try? self.fileCache.save(to: "todoItemsCache")
-//            self.updateToDoItems()
+            let itemToChange = self.toDoItems[indexPath.row]
+            let completedItem =  ToDoItem(id: itemToChange.id, text: itemToChange.text, importance: itemToChange.importance, deadline: itemToChange.deadline, isDone: true, creationDate: itemToChange.creationDate, modifiedDate: itemToChange.modifiedDate)
+            self.fileCache.add(completedItem)
+            self.fileCache.saveToCoreData()
+            self.updateToDoItems()
         })
         done.image = UIImage(named: "done")
         done.backgroundColor = .green

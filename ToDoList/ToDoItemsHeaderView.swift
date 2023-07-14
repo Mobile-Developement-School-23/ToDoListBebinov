@@ -27,7 +27,7 @@ class ToDoItemsHeaderView: UITableViewHeaderFooterView {
     }()
     override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
-        
+
         self.addSubview(hasDoneLabel)
         NSLayoutConstraint.activate([hasDoneLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 16), hasDoneLabel.topAnchor.constraint(equalTo: self.topAnchor), hasDoneLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor)])
         

@@ -13,7 +13,7 @@ class ToDoItemViewController: UIViewController{
     
     private var fileCache:FileCache = {
         let fileCache = FileCache()
-        try? fileCache.load(from: "todoItemsCache")
+        fileCache.loadFromCoreData()
         return fileCache
     }()
     
@@ -298,7 +298,7 @@ class ToDoItemViewController: UIViewController{
         }
         let todoItem = ToDoItem(id: id ?? UUID().uuidString, text: textView.text, importance: importance, deadline: deadlineDate, creationDate: creationDate)
         fileCache.add(todoItem)
-        try? fileCache.save(to: "todoItemsCache")
+        fileCache.saveToCoreData()
         updateHandler?()
         dismiss(animated: true)
     }
@@ -327,7 +327,7 @@ class ToDoItemViewController: UIViewController{
         if  let (key, _) = fileCache.items.first{
             fileCache.remove(key)
         }
-        try? fileCache.save(to: "todoItemsCache")
+        fileCache.saveToCoreData()
         updateHandler?()
         dismiss(animated: true)
     }

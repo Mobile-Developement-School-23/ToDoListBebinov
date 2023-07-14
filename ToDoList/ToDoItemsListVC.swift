@@ -59,6 +59,7 @@ class ToDoItemsListVC: UIViewController{
             let todoItemsList = try await service.todoItemsList()
             print(todoItemsList)
         }
+        fileCache.loadFromCoreData()
     }
     
     @objc func createNewItem(){
@@ -71,7 +72,7 @@ class ToDoItemsListVC: UIViewController{
     }
     
     func updateToDoItems(){
-        try? fileCache.load(from: "todoItemsCache")
+        fileCache.loadFromCoreData()
         var items = [ToDoItem]()
         for (_, item) in fileCache.items {
             items.append(item)
@@ -134,7 +135,7 @@ extension ToDoItemsListVC: UITableViewDelegate {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let delete = UIContextualAction(style: .destructive, title: nil, handler: {_,_,_ in
             self.fileCache.remove(self.toDoItems[indexPath.row].id)
-            try? self.fileCache.save(to: "todoItemsCache")
+            self.fileCache.saveToCoreData()
             self.updateToDoItems()
         })
         let info = UIContextualAction(style: .normal, title: "info", handler: {_,_,_ in
@@ -149,7 +150,7 @@ extension ToDoItemsListVC: UITableViewDelegate {
             let itemToChange = self.toDoItems[indexPath.row]
             let completedItem =  ToDoItem(id: itemToChange.id, text: itemToChange.text, importance: itemToChange.importance, deadline: itemToChange.deadline, isDone: true, creationDate: itemToChange.creationDate, modifiedDate: itemToChange.modifiedDate)
             self.fileCache.add(completedItem)
-            try? self.fileCache.save(to: "todoItemsCache")
+            self.fileCache.saveToCoreData()
             self.updateToDoItems()
         })
         done.image = UIImage(named: "done")

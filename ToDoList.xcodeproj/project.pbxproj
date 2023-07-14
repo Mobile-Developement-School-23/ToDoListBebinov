@@ -24,6 +24,7 @@
 		852B8A902A531AAC00360537 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 852B8A8F2A531AAC00360537 /* CocoaLumberjackSwift */; };
 		852B8A942A570F8B00360537 /* URLSession+asyncAwait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A932A570F8B00360537 /* URLSession+asyncAwait.swift */; };
 		852B8A962A57114C00360537 /* NetworkingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A952A57114C00360537 /* NetworkingService.swift */; };
+		852B8A992A5DB7D900360537 /* ToDoList.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 852B8A972A5DB7D900360537 /* ToDoList.xcdatamodeld */; };
 		C15AF8A1B039B2D1193FD429 /* Pods_ToDoListTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7ED25887D2170EBB8796DF4A /* Pods_ToDoListTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -72,6 +73,7 @@
 		852B8A922A53218400360537 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		852B8A932A570F8B00360537 /* URLSession+asyncAwait.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSession+asyncAwait.swift"; sourceTree = "<group>"; };
 		852B8A952A57114C00360537 /* NetworkingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingService.swift; sourceTree = "<group>"; };
+		852B8A982A5DB7D900360537 /* ToDoList.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ToDoList.xcdatamodel; sourceTree = "<group>"; };
 		B76CB990254A566B72EC5FF5 /* Pods-ToDoList.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ToDoList.debug.xcconfig"; path = "Target Support Files/Pods-ToDoList/Pods-ToDoList.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -153,6 +155,7 @@
 				852B8A8C2A4DEC4C00360537 /* ToDoItemsHeaderView.swift */,
 				852B8A932A570F8B00360537 /* URLSession+asyncAwait.swift */,
 				852B8A952A57114C00360537 /* NetworkingService.swift */,
+				852B8A972A5DB7D900360537 /* ToDoList.xcdatamodeld */,
 			);
 			path = ToDoList;
 			sourceTree = "<group>";
@@ -405,6 +408,7 @@
 				852B8A5B2A38E11300360537 /* ToDoItem.swift in Sources */,
 				852B8A5D2A38F11400360537 /* FileCache.swift in Sources */,
 				852B8A942A570F8B00360537 /* URLSession+asyncAwait.swift in Sources */,
+				852B8A992A5DB7D900360537 /* ToDoList.xcdatamodeld in Sources */,
 				852B8A892A4C760A00360537 /* ToDoItemsListVC.swift in Sources */,
 				852B8A962A57114C00360537 /* NetworkingService.swift in Sources */,
 				852B8A8B2A4C84B700360537 /* ToDoItemTableViewCell.swift in Sources */,
@@ -772,6 +776,19 @@
 			productName = CocoaLumberjackSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		852B8A972A5DB7D900360537 /* ToDoList.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				852B8A982A5DB7D900360537 /* ToDoList.xcdatamodel */,
+			);
+			currentVersion = 852B8A982A5DB7D900360537 /* ToDoList.xcdatamodel */;
+			path = ToDoList.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 852B8A1F2A38E0B100360537 /* Project object */;
 }
